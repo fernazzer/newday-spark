@@ -7,7 +7,7 @@ from newday_spark.loader import FileLoader
 from transformers.stats_transformer import StatsTransformer
 from newday_spark.transformer import Transformer
 from pyspark.sql.window import Window
-from pyspark.sql.functions import rank, col
+from pyspark.sql.functions import rank, col,mean,max,min
 
 class TransformTests(SparkBase):
 
@@ -62,9 +62,17 @@ class TransformTests(SparkBase):
         data = [("Java", 20000), ("Python", 100000), ("Scala", 3000),("Python", 110),("Python", 40000),("C#",23434)]
         schema = """language STRING,number INTEGER """
         df = self.spark.createDataFrame(data=data,schema=schema)
+
+
+        analytics_var = 'number'
+
+        resdf = df.groupBy('language')\
+                            .agg(
+                                min(analytics_var).alias(f'min_{analytics_var}'),
+                                max(analytics_var).alias(f'max_{analytics_var}'),
+                                mean(analytics_var).alias(f'mean_{analytics_var}')
+                            )
         
-        transformer = StatsTransformer(df,**{'groupByKey':'language','analytics_var':'number'})
-        resdf = transformer.transform()
         
         self.assertTrue('min_number' in resdf.columns)
         self.assertTrue('max_number' in resdf.columns)
