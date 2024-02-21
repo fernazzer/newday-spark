@@ -1,3 +1,5 @@
+## Running Spark App
+
 Example to run:
 
 /bin/spark-submit /../new-day/newday_spark/app.py
